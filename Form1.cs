@@ -38,6 +38,7 @@ namespace CSOnlineVersionChecker
         {
             localVersion.Text = OnlineVersion.GetLocalVersion();
             onlineVersion.Text = OnlineVersion.GetOnlineVersion();
+            typeUpdate.Text = OnlineVersion.GetUpdateTypeString();
             CheckUpdate();
         }
 

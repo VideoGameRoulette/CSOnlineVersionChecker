@@ -75,10 +75,10 @@ namespace CSOnlineVersionChecker
 
         public static object GetUpdateString(UpdateType ChangeType)
         {
-            if (ChangeType == UpdateType.MajorUpdate) { return "major update"; }
-            else if (ChangeType == UpdateType.MinorUpdate) { return "minor update"; }
-            else if (ChangeType == UpdateType.MajorBugFix) { return "major bug fix"; }
-            else if (ChangeType == UpdateType.MinorBugFix) { return "minor bug fix"; }
+            if (ChangeType == UpdateType.MajorUpdate) { return "Major Update"; }
+            else if (ChangeType == UpdateType.MinorUpdate) { return "Minor Update"; }
+            else if (ChangeType == UpdateType.MajorBugFix) { return "Major Bug Fix"; }
+            else if (ChangeType == UpdateType.MinorBugFix) { return "Minor Bug Fix"; }
             else { return null; }
         }
 
@@ -103,6 +103,36 @@ namespace CSOnlineVersionChecker
                 {
                     var CurrentVersion = TempMatch.Groups["version"].Value;
                     return CurrentVersion;
+                }
+                return null;
+            }
+            catch (NullReferenceException ex) { MessageBox.Show(ex.ToString()); return null; }
+        }
+
+        public static string GetUpdateTypeString()
+        {
+            try
+            {
+                string Response = GetResponse(PageAddress);
+                if (string.IsNullOrWhiteSpace(Response)) { } //Do Nothing
+                const string pattern = @"Current Version: (?<version>\d.\d.\d.\d)";
+                Match TempMatch = Regex.Match(Response, pattern);
+                if (TempMatch.Success)
+                {
+                    var CurrentVersion = TempMatch.Groups["version"].Value;
+                    string[] CurrentVersionTemp = CurrentVersion.Split('.');
+                    List<int> CurrentVersionList = new List<int>();
+                    Assembly assembly = Assembly.GetExecutingAssembly();
+                    FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+                    var LocalVersion = fvi.FileVersion;
+                    string[] LocalVersionTemp = LocalVersion.Split('.');
+                    List<int> LocalVersionList = new List<int>();
+                    for (int s = 0; s <= 3; s++) { CurrentVersionList.Add(Convert.ToInt32(CurrentVersionTemp[s])); LocalVersionList.Add(Convert.ToInt32(LocalVersionTemp[s])); }
+                    int[] CurrentVersionInt = { CurrentVersionList[0], CurrentVersionList[1], CurrentVersionList[2], CurrentVersionList[3] };
+                    int[] LocalVersionInt = { LocalVersionList[0], LocalVersionList[1], LocalVersionList[2], LocalVersionList[3] };
+                    UpdateType ChangeType;
+                    ChangeType = GetUpdateType(CurrentVersionInt, LocalVersionInt);
+                    return ChangeType.ToString();
                 }
                 return null;
             }
